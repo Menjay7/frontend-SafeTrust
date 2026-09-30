@@ -133,6 +133,13 @@ export default function HotelListingPage() {
           </div>
         </div>
 
+        <div className="mt-8">
+          <DestinationCarousel
+            destinations={filteredApartments}
+            onDestinationClick={handleApartmentClick}
+          />
+        </div>
+
         <div className="mt-6">
           <CategoryFilterRow
             selectedCategories={selectedCategories}
@@ -148,13 +155,6 @@ export default function HotelListingPage() {
             onMinPriceChange={setMinPrice}
             onMaxPriceChange={setMaxPrice}
             onReset={handleReset}
-          />
-        </div>
-
-        <div className="mt-8">
-          <DestinationCarousel
-            destinations={filteredApartments}
-            onDestinationClick={handleApartmentClick}
           />
         </div>
       </div>
