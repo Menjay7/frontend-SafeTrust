@@ -1,16 +1,35 @@
 "use client";
 
 import type { HotelListing } from "@/@types/hotel";
-import {
-  HotelHeader,
-  DestinationCarousel,
-  CategoryFilterRow,
-} from "@/components/listings";
+import { HotelHeader } from "@/components/listings";
 import { STUB_HOTELS } from "@/lib/mockData/hotels";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { LayoutDashboard, Lightbulb } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const DestinationCarousel = dynamic(
+  () => import("@/components/listings/DestinationCarousel"),
+  {
+    loading: () => (
+      <div className="h-[400px] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
+      </div>
+    ),
+  },
+);
+
+const CategoryFilterRow = dynamic(
+  () => import("@/components/listings/CategoryFilterRow"),
+  {
+    loading: () => (
+      <div className="h-20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+      </div>
+    ),
+  },
+);
 
 type SortOption = "relevance" | "price-low" | "price-high";
 
