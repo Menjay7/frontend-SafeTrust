@@ -54,26 +54,28 @@ export default function CategoryFilterRow({
         <button
           onClick={() => onCategoryToggle("")}
           className={cn(
-            "text-xs px-4 py-2 rounded-full transition-colors border",
+            "text-xs px-3 py-1.5 rounded-lg transition-colors border flex items-center gap-1.5",
             selectedCategories.length === 0
               ? "bg-orange-500 border-orange-500 text-white"
               : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300",
           )}
         >
-          All Categories
+          {selectedCategories.length === 0 ? "a" : "+"}
+          <span>All Categories</span>
         </button>
         {HOTEL_CATEGORIES.map((category) => (
           <button
             key={category}
             onClick={() => onCategoryToggle(category)}
             className={cn(
-              "text-xs px-4 py-2 rounded-full transition-colors border",
+              "text-xs px-3 py-1.5 rounded-lg transition-colors border flex items-center gap-1.5",
               selectedCategories.includes(category)
                 ? "bg-orange-500 border-orange-500 text-white"
                 : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300",
             )}
           >
-            {category}
+            {selectedCategories.includes(category) ? "a" : "+"}
+            <span>{category}</span>
           </button>
         ))}
       </div>
@@ -85,13 +87,14 @@ export default function CategoryFilterRow({
             key={location}
             onClick={() => onLocationToggle(location)}
             className={cn(
-              "text-xs px-4 py-2 rounded-full transition-colors border",
+              "text-xs px-3 py-1.5 rounded-lg transition-colors border flex items-center gap-1.5",
               selectedLocations.includes(location)
                 ? "bg-orange-500 border-orange-500 text-white"
                 : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300",
             )}
           >
-            {location}
+            {selectedLocations.includes(location) ? "a" : "+"}
+            <span>{location}</span>
           </button>
         ))}
       </div>
@@ -103,13 +106,14 @@ export default function CategoryFilterRow({
             key={option.value}
             onClick={() => onBedroomSelect(option.value)}
             className={cn(
-              "text-xs px-4 py-2 rounded-full transition-colors border",
+              "text-xs px-3 py-1.5 rounded-lg transition-colors border flex items-center gap-1.5",
               selectedBedrooms === option.value
                 ? "bg-orange-500 border-orange-500 text-white"
                 : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300",
             )}
           >
-            {option.label}
+            {selectedBedrooms === option.value ? "a" : "+"}
+            <span>{option.label}</span>
           </button>
         ))}
       </div>
