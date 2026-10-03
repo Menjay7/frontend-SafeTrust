@@ -1,21 +1,12 @@
 "use client";
 
-import type { HotelListing } from "@/@types/hotel";
-import {
-  HotelHeader,
-  DestinationCarousel,
-  CategoryFilterRow,
-} from "@/components/listings";
-import { STUB_HOTELS } from "@/lib/mockData/hotels";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { LayoutDashboard, Lightbulb } from "lucide-react";
 
-type SortOption = "relevance" | "price-low" | "price-high";
 
-export default function HotelListingPage() {
+type SortOption = "relevance" | "price-low" | "price-high" | "nearest";
+
+export default function ApartmentListingPage() {
   const router = useRouter();
+  const geo = useGeolocation();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     "Family",
     "Students",
@@ -28,9 +19,50 @@ export default function HotelListingPage() {
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
   const [minPrice, setMinPrice] = useState<number>(3200);
   const [maxPrice, setMaxPrice] = useState<number>(206000);
+  const [favorites, setFavorites] = useState<string[]>(
+    APARTMENT_LISTINGS.filter((h) => h.favorite).map((h) => h.id),
+  );
+
+  const toggleFavorite = (id: string) => {
+    setFavorites((curr) =>
+      curr.includes(id) ? curr.filter((f) => f !== id) : [...curr, id],
+    );
+  };
+
+  const isOutsideCostaRica = useMemo(() => {
+    if (!geo.position) return false;
+    const origin = geo.position;
+    const nearestListingKm = Math.min(
+      ...APARTMENT_LISTINGS.map((apartment) =>
+        distanceKm(origin, apartment.coordinates),
+      ),
+    );
+    return nearestListingKm > 300;
+  }, [geo.position]);
+
+  useEffect(() => {
+    if (geo.position) {
+      setSortOption(isOutsideCostaRica ? "relevance" : "nearest");
+    } else if (geo.status === "idle") {
+      setSortOption("relevance");
+    }
+  }, [geo.position, geo.status, isOutsideCostaRica]);
+
+  const distances = useMemo(
+    () =>
+      geo.position
+        ? Object.fromEntries(
+            APARTMENT_LISTINGS.map((apartment) => [
+              apartment.id,
+              distanceKm(geo.position!, apartment.coordinates),
+            ]),
+          )
+        : undefined,
+    [geo.position],
+  );
 
   const filteredApartments = useMemo(() => {
-    const apartments = STUB_HOTELS.filter((apartment) => {
+    const apartments = APARTMENT_LISTINGS.filter((apartment) => {
       const matchesCategory =
         selectedCategories.length === 0 ||
         selectedCategories.includes(apartment.category);
@@ -48,6 +80,14 @@ export default function HotelListingPage() {
       );
     });
 
+    if (sortOption === "nearest" && geo.position && !isOutsideCostaRica) {
+      return sortByDistance(
+        apartments,
+        geo.position,
+        (apartment) => apartment.coordinates,
+      );
+    }
+
     if (sortOption === "price-low") {
       return [...apartments].sort((left, right) => left.price - right.price);
     }
@@ -60,6 +100,7 @@ export default function HotelListingPage() {
       (left, right) => Number(right.promoted) - Number(left.promoted),
     );
   }, [
+
     maxPrice,
     minPrice,
     selectedBedrooms,
@@ -68,24 +109,8 @@ export default function HotelListingPage() {
     sortOption,
   ]);
 
-  const toggleValue = (values: string[], value: string) => {
-    if (value === "") {
-      return [];
-    }
-    return values.includes(value)
-      ? values.filter((item) => item !== value)
-      : [...values, value];
-  };
 
-  const handleCategoryToggle = (category: string) => {
-    if (category === "") {
-      setSelectedCategories([]);
-    } else {
-      setSelectedCategories((current) => toggleValue(current, category));
-    }
-  };
-
-  const handleApartmentClick = (apartment: HotelListing) => {
+  const handleApartmentClick = (apartment: ApartmentListing) => {
     router.push(`/rent/${apartment.id}`);
   };
 
@@ -102,34 +127,7 @@ export default function HotelListingPage() {
     <div className="min-h-screen bg-white dark:bg-slate-900 text-gray-900 dark:text-white">
       <HotelHeader />
 
-      <div className="mx-auto max-w-[1180px] px-6 py-8 lg:px-12">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h1 className="text-[24px] leading-tight text-gray-900 dark:text-white sm:text-[30px]">
-              Available for rent in{" "}
-              <span className="font-semibold">Costa Rica, San José</span>
-            </h1>
-            <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-              204 units available
-            </p>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-1.5 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Switch to Host view
-            </button>
-
-            <Link
-              href="/guest/suggestions"
-              className="flex items-center gap-1.5 text-sm font-medium text-orange-500 transition-colors hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-            >
-              <Lightbulb aria-hidden="true" className="h-4 w-4" />
-              Suggestions view
-            </Link>
           </div>
         </div>
 
